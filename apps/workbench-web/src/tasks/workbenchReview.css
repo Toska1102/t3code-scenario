@@ -1,0 +1,259 @@
+/* Ticket 07 review surfaces. Static classes only; dark palette follows 04-01. */
+
+.task-review {
+  background: #0d131f;
+  color: #dbe4f5;
+  font-family: system-ui, sans-serif;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.task-review-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.task-review-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.task-review-progress {
+  color: #3fb96f;
+  font-size: 13px;
+}
+
+.task-review-body {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.task-review-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.task-review-side {
+  width: 260px;
+}
+
+.review-diagram {
+  background: #101827;
+  border: 1px solid #1f2b40;
+  border-radius: 12px;
+  overflow: auto;
+}
+
+.review-diagram svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.review-diagram-edge {
+  fill: none;
+  stroke: #3fb96f;
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+
+.review-diagram-node rect {
+  fill: #16233a;
+  stroke-width: 1.5;
+}
+
+.review-diagram-step-title {
+  fill: #eaf0fb;
+  font-size: 13px;
+}
+
+.review-diagram-step-meta {
+  fill: #8fa3c2;
+  font-size: 11px;
+}
+
+.review-decision,
+.review-queue {
+  background: #101827;
+  border: 1px solid #1f2b40;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.review-decision h3,
+.review-queue h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.review-attempt {
+  color: #8fa3c2;
+  font-weight: 400;
+}
+
+.review-deputy {
+  color: #e2b93b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.review-count {
+  background: #e2b93b;
+  color: #101827;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 1px 8px;
+}
+
+.review-queue ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-queue button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #16233a;
+  color: #dbe4f5;
+  border: 1px solid #1f2b40;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.review-queue button:focus-visible {
+  outline: 2px solid #4cc3dd;
+}
+
+.review-queue-status {
+  color: #e2b93b;
+  font-size: 12px;
+}
+
+.review-queue-attempt {
+  color: #8fa3c2;
+  font-size: 12px;
+}
+
+.review-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.review-fields label {
+  font-size: 12px;
+  color: #8fa3c2;
+}
+
+.review-fields textarea,
+.review-fields select {
+  background: #16233a;
+  color: #dbe4f5;
+  border: 1px solid #1f2b40;
+  border-radius: 8px;
+  padding: 8px;
+  font: inherit;
+}
+
+.review-fields textarea:focus-visible,
+.review-fields select:focus-visible {
+  outline: 2px solid #4cc3dd;
+}
+
+.review-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.review-actions button {
+  border-radius: 8px;
+  border: 1px solid #1f2b40;
+  padding: 6px 16px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.review-actions button:focus-visible {
+  outline: 2px solid #4cc3dd;
+}
+
+.review-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.review-approve {
+  background: #1d5c3a;
+  color: #d6f5e2;
+}
+
+.review-return {
+  background: #5c3520;
+  color: #f5ddcf;
+}
+
+.review-impact {
+  font-size: 12px;
+  color: #8fa3c2;
+  margin: 4px 0 0;
+}
+
+.review-note {
+  font-size: 12px;
+  color: #5b6b84;
+  margin: 8px 0 0;
+}
+
+.review-error {
+  color: #e06c5f;
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+.review-empty {
+  color: #5b6b84;
+  font-size: 13px;
+}
+
+.review-record {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 16px;
+  margin: 0;
+}
+
+.review-record dt {
+  color: #8fa3c2;
+  font-size: 12px;
+}
+
+.review-record dd {
+  margin: 0;
+  font-size: 13px;
+}
+
+.task-review-legend {
+  color: #5b6b84;
+  font-size: 12px;
+  margin: 0;
+}
