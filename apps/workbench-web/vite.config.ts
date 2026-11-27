@@ -1,17 +1,10 @@
+// @effect-diagnostics-next-line nodeBuiltinImport:off -- Vite config runs before any Effect runtime.
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { playwright } from "vite-plus/test/browser-playwright";
+import { defineProject, type TestProjectInlineConfiguration } from "vite-plus/test/config";
 import "vite-plus/test/config";
-import { playwright } from "@vitest/browser-playwright";
-import { defineConfig, mergeConfig } from "vite-plus";
-
-import baseConfig from "../../vite.config.ts";
-
-// Mirror the repo's per-package pattern: inherit the root config minus its project list
-// and minus the Node-only setup files, which this all-browser package cannot load.
-const { run: _rootRunConfig, ...basePackageConfig } = baseConfig;
-const {
-  projects: _rootTestProjects,
-  setupFiles: _rootSetupFiles,
-  ...baseTestConfig
-} = baseConfig.test ?? {};
+import { defineConfig } from "vite-plus";
 
 const unitTestProject = {
   extends: true,
@@ -22,30 +15,35 @@ const unitTestProject = {
     hookTimeout: 15_000,
     testTimeout: 15_000,
   },
-};
+} satisfies TestProjectInlineConfiguration;
 
+// Pre-bundle lazy browser entries to avoid mid-run reloads (same as apps/web).
 const browserTestProject = {
   extends: true,
+  optimizeDeps: {
+    include: ["vite-plus/test/browser"],
+  },
   test: {
     name: "browser",
     include: ["src/**/*.browser.test.{ts,tsx}"],
     hookTimeout: 15_000,
     testTimeout: 15_000,
-    api: { port: 22_007, strictPort: false },
+    api: { port: 23_457, strictPort: false },
     browser: {
       enabled: true,
       headless: true,
       provider: playwright(),
-      instances: [{ browser: "chromium" as const }],
+      instances: [{ browser: "chromium" }],
       screenshotFailures: false,
     },
   },
-};
+} satisfies TestProjectInlineConfiguration;
 
-export default mergeConfig(
-  { ...basePackageConfig, test: baseTestConfig },
-  defineConfig({
-    server: { proxy: { "/api": `http://127.0.0.1:${process.env.T3CODE_PORT ?? "3773"}` } },
-    test: { projects: [unitTestProject, browserTestProject] },
-  }),
-);
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  server: { proxy: { "/api": `http://127.0.0.1:${process.env.T3CODE_PORT ?? "3773"}` } },
+  resolve: { tsconfigPaths: true, dedupe: ["react", "react-dom"] },
+  test: {
+    projects: [defineProject(unitTestProject), defineProject(browserTestProject)],
+  },
+});

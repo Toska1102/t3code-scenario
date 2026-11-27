@@ -109,6 +109,12 @@
       // electron-builder from this workspace, outside its package scripts.
       "ignoreDependencies": ["playwright-core", "electron-builder"],
     },
+    "apps/workbench-web": {
+      // The task-detail surface is a component set mounted by a host app that
+      // owns index.html and the Tailwind stylesheet pipeline; the plugin is
+      // wired in its vite.config, and this dep stays for the utility classes.
+      "ignoreDependencies": ["tailwindcss"],
+    },
     "apps/web": {
       // Worktree setup (scripts/setup-worktree.ts) runs this directly, and evidence
       // fixtures run under node.
