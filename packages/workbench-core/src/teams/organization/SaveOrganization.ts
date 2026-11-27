@@ -4,7 +4,7 @@ import {
   validateOrganization,
   type OrganizationDraft,
   type OrganizationIssue,
-} from "./Organization";
+} from "./Organization.ts";
 
 export interface TeamInfo {
   name: string;
