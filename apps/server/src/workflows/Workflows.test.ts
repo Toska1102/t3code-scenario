@@ -57,6 +57,8 @@ import { agent, ask } from "./workflowAgent.ts";
 import * as Workflows from "./Workflows.ts";
 import * as WorkflowStore from "./WorkflowStore.ts";
 import type { WorkflowRun, WorkflowRunStatus } from "./WorkflowStore.ts";
+import { ProviderRegistry } from "../provider/ProviderRegistry.ts";
+import * as WorkflowProviderChecks from "./WorkflowProviderChecks.ts";
 
 const once = { retry: { times: 0 } } as const;
 
@@ -965,7 +967,10 @@ const stampedBetween = (stamp: string, from: DateTime.Utc, to: DateTime.Utc) => 
   return DateTime.toEpochMillis(from) <= at && at <= DateTime.toEpochMillis(to);
 };
 
-const harness = Effect.fnUntraced(function* (store?: typeof WorkflowStore.layer) {
+const harness = Effect.fnUntraced(function* (
+  store?: typeof WorkflowStore.layer,
+  guard?: (agents: WorkflowAgents["Service"]) => WorkflowAgents["Service"],
+) {
   const fileSystem = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
   const directory = yield* fileSystem.makeTempDirectoryScoped({ prefix: "t3-workflows-" });
@@ -1002,7 +1007,7 @@ const harness = Effect.fnUntraced(function* (store?: typeof WorkflowStore.layer)
   ];
   const engineOf = (registered: typeof all) =>
     WorkflowEngine.layer(registered, store).pipe(
-      Layer.provide(Layer.succeed(WorkflowAgents, agents.service)),
+      Layer.provide(Layer.succeed(WorkflowAgents, guard?.(agents.service) ?? agents.service)),
       Layer.provide(Layer.succeed(WorkflowForge, forge.service)),
       Layer.provide(database),
       Layer.provide(NodeCrypto.layer),
@@ -1034,6 +1039,75 @@ const exposedStore = () => {
 
 /** The review workflow sleeps first, which is waiting too; this is its wait for a verdict. */
 const atVerdict = (run: WorkflowRun) => run.status === "waiting" && run.detail === "verdict";
+
+it.effect("keeps a hard-limited task pending instead of launching an unconstrained provider", () =>
+  Effect.gen(function* () {
+    const checks = yield* WorkflowProviderChecks.make.pipe(
+      Effect.provide(Layer.mock(ProviderRegistry)({ getProviders: Effect.succeed([]) })),
+    );
+    const { boot } = yield* harness(undefined, checks.guard);
+    const bounded = workflow("bounded", { version: 1, payload: Schema.Struct({}) }, () =>
+      agent("research", {
+        brief: "Summarize the input.",
+        project: "p1",
+        model: { instanceId: "codex-local", model: "test-model" },
+        limits: { tools: [], totalTokens: 4000 },
+      }),
+    );
+    yield* boot(
+      Effect.gen(function* () {
+        const workflows = yield* Workflows.Workflows;
+        const { runId } = yield* workflows.start("bounded", {}, { idempotencyKey: "bounded-1" });
+        const run = yield* workflows.waitFor(runId, (current) => current.status === "paused");
+        assert.include(run.detail ?? "", "research");
+        assert.include(run.detail ?? "", "codex-local");
+        assert.include(run.detail ?? "", "instance_unavailable");
+        const detail = yield* workflows.get(runId);
+        assert.deepStrictEqual(
+          detail.steps.map((entry) => [entry.name, entry.status, entry.threadId]),
+          [["research", "failed", null]],
+        );
+      }),
+      [bounded],
+    );
+  }).pipe(Effect.provide(NodeServices.layer), Effect.scoped),
+);
+
+it.effect("carries per-step hard limits to the runtime without turning them into prompts", () =>
+  Effect.gen(function* () {
+    const { boot, agents } = yield* harness();
+    const limits = { tools: ["read"], totalTokens: 4000 };
+    const bounded = workflow("bounded", { version: 1, payload: Schema.Struct({}) }, () =>
+      agent("research", {
+        brief: "Summarize the input.",
+        project: "p1",
+        model: { instanceId: "codex-local", model: "test-model" },
+        limits,
+      }),
+    );
+    yield* boot(
+      Effect.gen(function* () {
+        const workflows = yield* Workflows.Workflows;
+        const { runId } = yield* workflows.start("bounded", {}, { idempotencyKey: "bounded-1" });
+        const run = yield* workflows.waitFor(
+          runId,
+          (current) => current.status === "waiting" || current.status === "paused",
+        );
+        assert.equal(run.status, "waiting", run.detail ?? "");
+        const started = yield* agents.started(runId, "research/0");
+        assert.deepStrictEqual(started.limits, limits);
+        assert.equal(started.prompt, "Summarize the input.");
+        yield* agents.end(runId, "research/0", { ending: "completed", detail: "", reply: "done" });
+        assert.deepStrictEqual(
+          (yield* workflows.waitFor(runId, (current) => current.status === "completed")).result,
+          { value: "done", thread: { threadId: "thread-1" } },
+        );
+      }),
+      [bounded],
+    );
+  }).pipe(Effect.provide(NodeServices.layer), Effect.scoped),
+);
+
 const status =
   (...statuses: ReadonlyArray<WorkflowRunStatus>) =>
   (run: WorkflowRun) =>

@@ -2,6 +2,16 @@ import * as Schema from "effect/Schema";
 
 import { IssueRef } from "./issue.ts";
 import { PullRequestRef } from "./pullRequest.ts";
+import { TrimmedNonEmptyString } from "./baseSchemas.ts";
+
+export const WorkflowAgentLimits = Schema.Struct({
+  tools: Schema.Array(TrimmedNonEmptyString),
+  totalTokens: Schema.Int.check(
+    Schema.isGreaterThan(0),
+    Schema.isLessThanOrEqualTo(Number.MAX_SAFE_INTEGER),
+  ),
+});
+export type WorkflowAgentLimits = typeof WorkflowAgentLimits.Type;
 
 export const WorkflowRunStatus = Schema.Literals([
   "running",

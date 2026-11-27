@@ -28,6 +28,7 @@ import * as ProviderRegistry from "../provider/ProviderRegistry.ts";
 import * as ServerSettings from "../serverSettings.ts";
 import * as ServerEnvironment from "../environment/ServerEnvironment.ts";
 import * as WorkflowAgentLinks from "./WorkflowAgentLinks.ts";
+import * as WorkflowProviderChecks from "./WorkflowProviderChecks.ts";
 import {
   isProjectPath,
   launchOnContinue,
@@ -53,6 +54,7 @@ const make = Effect.gen(function* () {
   const settings = yield* ServerSettings.ServerSettingsService;
   const digest = yield* Digest.Digest;
   const linked = yield* WorkflowAgentLinks.make;
+  const checks = yield* WorkflowProviderChecks.make;
   const forge = yield* WorkflowForge;
   const threadIssues = yield* ThreadIssueService.ThreadIssueService;
   // A tracker that is down must not cost the step its agent.
@@ -139,7 +141,7 @@ const make = Effect.gen(function* () {
     return found.value.id;
   });
 
-  return WorkflowAgents.of({
+  const agents = WorkflowAgents.of({
     start: Effect.fn("WorkflowAgentThreads.start")(function* (input) {
       const id = yield* idOf(input.key);
       const environment = elsewhere(input.environment);
@@ -330,6 +332,7 @@ const make = Effect.gen(function* () {
       return stopped.type === "interrupt_requested" ? ("stopped" as const) : ("ended" as const);
     }),
   });
+  return checks.guard(agents);
 });
 
 export const layer = Layer.effect(WorkflowAgents, make);

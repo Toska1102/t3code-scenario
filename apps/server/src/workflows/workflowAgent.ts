@@ -7,6 +7,7 @@ import * as Option from "effect/Option";
 import * as Result from "effect/Result";
 import * as Schema from "effect/Schema";
 import { Activity, DurableDeferred } from "effect/workflow";
+import type { WorkflowAgentLimits } from "@t3tools/contracts";
 
 import { checkOptions } from "./options.ts";
 import { stepReferences } from "./runReferences.ts";
@@ -41,6 +42,7 @@ const CORRECTIONS = 2;
 
 export interface AgentOptions<A, I> extends AgentLaunch {
   readonly brief: string;
+  readonly limits?: WorkflowAgentLimits;
   /** The new thread's title. `<workflow>: <step>` by default. */
   readonly title?: string;
   readonly returns?: Schema.Codec<A, I>;
@@ -70,6 +72,7 @@ type Attempt<A> =
 
 const AGENT_OPTIONS = [
   "brief",
+  "limits",
   "returns",
   "model",
   "project",
@@ -250,6 +253,7 @@ const attempt = Effect.fn("workflow.agent")(function* <A, I>(
         environment: thread === undefined ? options.environment : thread.environment,
         thread: thread?.threadId,
         issue: options.issue,
+        limits: options.limits,
       })
       .pipe(
         Effect.provideContext(touches),
