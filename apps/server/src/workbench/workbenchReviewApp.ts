@@ -1,10 +1,12 @@
 import {
   WorkbenchReviewError,
   type WorkbenchReviewQueueEntry,
-  type WorkbenchReviewRecord,
   type WorkbenchReviewService,
 } from "../../../../packages/workbench-core/src/tasks/workbenchReviewService.ts";
-import type { WorkbenchTaskReviewState } from "../../../../packages/workbench-core/src/tasks/workbenchReviewMemoryStore.ts";
+import type {
+  WorkbenchReviewRecord,
+  WorkbenchTaskReviewState,
+} from "../../../../packages/workbench-core/src/tasks/workbenchReviewMemoryStore.ts";
 
 /**
  * App port the server's HTTP/WS transport mounts: derive `authenticatedUserId`
@@ -36,7 +38,7 @@ export interface WorkbenchReviewApp {
     request: WorkbenchReviewRequest & { taskId: string },
   ): WorkbenchReviewAppResponse<{ task: WorkbenchTaskReviewState }>;
   handleDecide(
-    request: WorkbenchReviewRequest<Record<string, unknown>>,
+    request: WorkbenchReviewRequest,
   ): WorkbenchReviewAppResponse<{ review: WorkbenchReviewRecord }>;
 }
 
@@ -45,6 +47,8 @@ const ERROR_STATUS: Record<string, 400 | 404 | 409 | 422> = {
   unknown_task: 404,
   unknown_step: 404,
   review_not_open: 409,
+  idempotency_conflict: 409,
+  invalid_step_completion: 409,
   blank_reason: 422,
   invalid_return_target: 422,
 };
@@ -98,7 +102,10 @@ export function createWorkbenchReviewApp(deps: {
     handleDecide(request) {
       const denied = requireActor(request);
       if (denied) return denied;
-      const body = request.body;
+      const body =
+        typeof request.body === "object" && request.body !== null && !Array.isArray(request.body)
+          ? (request.body as Record<string, unknown>)
+          : undefined;
       const taskId = typeof body?.taskId === "string" ? body.taskId : undefined;
       const stepId = typeof body?.stepId === "string" ? body.stepId : undefined;
       const attempt = typeof body?.attempt === "number" ? body.attempt : undefined;
@@ -107,7 +114,16 @@ export function createWorkbenchReviewApp(deps: {
       const reason = typeof body?.reason === "string" ? body.reason : undefined;
       const returnToStepId =
         typeof body?.returnToStepId === "string" ? body.returnToStepId : undefined;
-      if (!taskId || !stepId || attempt === undefined || !decision) {
+      const requestId = typeof body?.requestId === "string" ? body.requestId : undefined;
+      if (
+        !taskId ||
+        !stepId ||
+        attempt === undefined ||
+        !Number.isSafeInteger(attempt) ||
+        attempt < 1 ||
+        !decision ||
+        (body?.requestId !== undefined && !requestId?.trim())
+      ) {
         return {
           status: 400,
           body: {
@@ -120,7 +136,15 @@ export function createWorkbenchReviewApp(deps: {
       }
       try {
         const review = service.decideReview(
-          { taskId, stepId, attempt, decision, reason, returnToStepId },
+          {
+            taskId,
+            stepId,
+            attempt,
+            decision,
+            ...(reason === undefined ? {} : { reason }),
+            ...(returnToStepId === undefined ? {} : { returnToStepId }),
+            ...(requestId === undefined ? {} : { requestId }),
+          },
           // The actor comes from authentication only; any actor field in the payload
           // is deliberately not read (D03).
           { actorId: request.authenticatedUserId! },

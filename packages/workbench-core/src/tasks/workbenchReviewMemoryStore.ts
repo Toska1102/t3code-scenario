@@ -21,13 +21,14 @@ export interface WorkbenchReviewRecord {
   stepId: string;
   /** Attempt of the reviewed output; an approval belongs to exactly one attempt (D05). */
   attempt: number;
-  status: "open" | WorkbenchReviewDecision;
+  status: "open" | "invalidated" | WorkbenchReviewDecision;
   assignedReviewerId: string;
   /** The admin who actually acted; a deputy never gains ownership (D03). */
   decidedByActorId?: string;
   decidedAt?: string;
   reason?: string;
   returnToStepId?: string;
+  requestId?: string;
 }
 
 export interface WorkbenchTaskReviewState {
@@ -78,6 +79,7 @@ export function createWorkbenchReviewMemoryStore(): WorkbenchReviewStore {
       // Single-threaded synchronous mutation is the transaction; the caller's throw
       // aborts before any write lands.
       const next = mutate(clone(current));
+      if (JSON.stringify(next) === JSON.stringify(current)) return clone(current);
       next.version = current.version + 1;
       tasks.set(taskId, clone(next));
       return clone(next);
