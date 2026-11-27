@@ -337,7 +337,7 @@ function AgentDetailHeader({
   onCheck,
 }: {
   instance: AgentInstanceView;
-  lastCheck?: { checkedAt: string; message: string };
+  lastCheck: { checkedAt: string; message: string } | undefined;
   checking: boolean;
   onToggleEnabled: () => Promise<void>;
   onSetDefault: () => Promise<void>;

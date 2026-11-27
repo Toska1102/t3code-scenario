@@ -119,15 +119,16 @@ function assigneeLabel(
   people: PersonRef[],
   agents: AgentInstanceRef[],
 ): { text: string; bound: boolean } {
-  if (!node.assignee) return { text: "未绑定", bound: false };
-  if (node.assignee.kind === "person") {
+  const assignee = node.assignee;
+  if (!assignee) return { text: "未绑定", bound: false };
+  if (assignee.kind === "person") {
     return {
-      text: people.find((p) => p.id === node.assignee?.personId)?.name ?? "人员",
+      text: people.find((p) => p.id === assignee.personId)?.name ?? "人员",
       bound: true,
     };
   }
   return {
-    text: agents.find((a) => a.id === node.assignee?.instanceId)?.name ?? "Agent",
+    text: agents.find((a) => a.id === assignee.instanceId)?.name ?? "Agent",
     bound: true,
   };
 }
@@ -283,9 +284,10 @@ export function OrganizationDialog(props: OrganizationDialogProps) {
       let next = removeNodes(current, cascadeIds);
       next = {
         ...next,
-        nodes: next.nodes.map((n) =>
-          rehomeByOrphan[n.id] ? { ...n, parentIds: [rehomeByOrphan[n.id]] } : n,
-        ),
+        nodes: next.nodes.map((n) => {
+          const parentId = rehomeByOrphan[n.id];
+          return parentId ? { ...n, parentIds: [parentId] } : n;
+        }),
       };
       return next;
     });
@@ -1398,13 +1400,14 @@ function NodeForm(props: {
       const match = part.match(/^(.+?)\s*→\s*(.+?)\s*(必审|可选)?$/);
       const reviewerName = match?.[2];
       const matches = reviewerName ? props.draft.nodes.filter((n) => n.name === reviewerName) : [];
-      if (!match || !match[1].trim() || matches.length !== 1) {
+      const taskType = match?.[1]?.trim();
+      if (!match || !taskType || matches.length !== 1) {
         setRuleError("评审规则需要形如「简历审核 → HR 总管 必审」，且评审节点名称唯一存在");
         return;
       }
       rules.push({
         id: `${node.id}-rule-${rules.length + 1}`,
-        taskType: match[1].trim(),
+        taskType,
         reviewerNodeId: matches[0]!.id,
         required: match[3] === "必审",
       });

@@ -1,5 +1,12 @@
 import { getPairingTokenFromUrl, stripPairingTokenFromUrl } from "@t3tools/shared/remote";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { createContext, useContext, useState, type FormEvent, type ReactNode } from "react";
+
+import type { ProductIdentity } from "./projects/productMounts";
+
+const IdentityContext = createContext<ProductIdentity>({ authenticated: false });
+export function useWorkbenchIdentity() {
+  return useContext(IdentityContext);
+}
 
 async function pair(credential: string) {
   const response = await fetch("/api/auth/browser-session", {
@@ -11,7 +18,7 @@ async function pair(credential: string) {
   if (!response.ok) throw new Error("连接失败，请检查配对凭据后重试。");
 }
 
-export async function getInitialSession(): Promise<{ authenticated: boolean; message?: string }> {
+export async function getInitialSession(): Promise<ProductIdentity & { message?: string }> {
   const url = new URL(window.location.href);
   const credential = getPairingTokenFromUrl(url);
   try {
@@ -20,7 +27,6 @@ export async function getInitialSession(): Promise<{ authenticated: boolean; mes
       if (clean.pathname === "/pair") clean.pathname = "/";
       window.history.replaceState(window.history.state, "", clean);
       await pair(credential);
-      return { authenticated: true };
     }
     const response = await fetch("/api/auth/session", {
       credentials: "same-origin",
@@ -28,7 +34,11 @@ export async function getInitialSession(): Promise<{ authenticated: boolean; mes
     });
     if (!response.ok) throw new Error("无法读取登录状态，请重新连接。");
     const session = await response.json();
-    return { authenticated: session.authenticated === true };
+    return {
+      authenticated: session.authenticated === true,
+      sessionId: session.sessionId,
+      scopes: session.scopes,
+    };
   } catch (error) {
     return {
       authenticated: false,
@@ -44,10 +54,10 @@ export function WorkbenchSession({
   initial: Awaited<ReturnType<typeof getInitialSession>>;
   children: ReactNode;
 }) {
-  const [authenticated, setAuthenticated] = useState(initial.authenticated);
+  const [identity, setIdentity] = useState(initial);
   const [message, setMessage] = useState(initial.message);
   const [busy, setBusy] = useState(false);
-  if (authenticated) return children;
+  if (identity.authenticated) return <IdentityContext value={identity}>{children}</IdentityContext>;
   async function connect(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const credential = String(new FormData(event.currentTarget).get("credential") ?? "").trim();
@@ -55,7 +65,9 @@ export function WorkbenchSession({
     setBusy(true);
     try {
       await pair(credential);
-      setAuthenticated(true);
+      const session = await getInitialSession();
+      if (!session.authenticated) throw new Error("登录会话未建立。");
+      setIdentity(session);
     } catch {
       setMessage("连接失败，请检查配对凭据后重试。");
     } finally {

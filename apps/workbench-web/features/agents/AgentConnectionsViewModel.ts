@@ -93,9 +93,8 @@ export function createAgentConnectionsViewModel({
 
     async checkSelected() {
       const instanceId = selectedInstanceId;
-      const outcome = await service.checkConnection(instanceId, {
-        draft: dirtyInstanceIds.has(instanceId) ? draftForInstance(instanceId) : undefined,
-      });
+      const draft = dirtyInstanceIds.has(instanceId) ? draftForInstance(instanceId) : undefined;
+      const outcome = await service.checkConnection(instanceId, draft ? { draft } : {});
       lastChecks.set(instanceId, outcome);
       summary = await service.getSnapshot();
       return outcome;

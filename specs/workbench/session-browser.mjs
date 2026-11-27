@@ -61,8 +61,21 @@ try {
   const refreshed = await page.request.get(`${origin}/api/auth/session`);
   NodeAssert.equal((await refreshed.json()).authenticated, true);
   NodeAssert.equal(await page.getByRole("heading", { name: "连接工作台" }).count(), 0);
+  await page.getByRole("heading", { name: "团队总览" }).waitFor();
+  await page.getByRole("link", { name: "查看项目 →" }).click();
+  await page.getByRole("heading", { name: "验收团队的项目" }).waitFor();
+  await page.getByRole("link", { name: "新建项目" }).click();
+  await page.getByLabel("项目名称").fill("浏览器创建的项目");
+  await page.getByRole("button", { name: "保存", exact: true }).click();
+  await page.getByRole("heading", { name: "浏览器创建的项目" }).waitFor();
+  await page.getByRole("button", { name: "项目设置" }).click();
+  await page.getByLabel("项目名称").fill("浏览器更新的项目");
+  await page.getByRole("button", { name: "保存", exact: true }).click();
+  await page.getByRole("heading", { name: "浏览器更新的项目" }).waitFor();
+  await page.reload();
+  await page.getByRole("heading", { name: "浏览器更新的项目" }).waitFor();
   console.log(
-    "PASS anonymous entry, rejected credential, successful T3 pairing, URL cleanup, session after reload",
+    "PASS T3 authentication, team overview, project navigation, creation, update and persistence after reload",
   );
 } finally {
   await browser.close();
