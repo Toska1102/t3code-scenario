@@ -45,6 +45,7 @@ const browserTestProject = {
 export default mergeConfig(
   { ...basePackageConfig, test: baseTestConfig },
   defineConfig({
+    server: { proxy: { "/api": `http://127.0.0.1:${process.env.T3CODE_PORT ?? "3773"}` } },
     test: { projects: [unitTestProject, browserTestProject] },
   }),
 );

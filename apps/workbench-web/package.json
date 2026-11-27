@@ -10,6 +10,7 @@
     "test": "vp test run --passWithNoTests --project unit --project browser"
   },
   "dependencies": {
+    "@t3tools/shared": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

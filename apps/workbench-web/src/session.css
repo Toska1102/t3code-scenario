@@ -1,0 +1,47 @@
+.workbench-session {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: #0a0f1a;
+  color: #f3f4f7;
+  font-family: Inter, system-ui, sans-serif;
+}
+.workbench-session form {
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.25rem;
+  width: min(27rem, 92vw);
+  padding: 2rem;
+  background: #121d2e;
+  border: 1px solid #2a384b;
+  border-radius: 0.75rem;
+}
+.workbench-session h1,
+.workbench-session p {
+  margin: 0;
+}
+.workbench-session label {
+  display: grid;
+  gap: 0.5rem;
+}
+.workbench-session input {
+  background: #0a0f1a;
+  color: inherit;
+  border: 1px solid #526476;
+  padding: 0.75rem;
+  border-radius: 0.4rem;
+  font: inherit;
+}
+.workbench-session button {
+  justify-self: end;
+  color: #0a0f1a;
+  border: 0;
+  border-radius: 0.4rem;
+  background: #1addff;
+  padding: 0.625rem 1.25rem;
+  cursor: pointer;
+  font: inherit;
+}
+.workbench-session [role="alert"] {
+  color: #ffbaad;
+}

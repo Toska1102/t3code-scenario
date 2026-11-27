@@ -1,0 +1,11 @@
+{
+  "name": "@t3tools/workbench-adapters",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./organization-yaml": "./src/yaml/index.ts"
+  },
+  "dependencies": {
+    "yaml": "catalog:"
+  }
+}
