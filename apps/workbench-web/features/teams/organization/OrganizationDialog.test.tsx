@@ -3,9 +3,9 @@ import { configure, fireEvent, getByRole, within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { boardOrganization } from "../../../../../packages/workbench-core/src/teams/organization/Organization.test";
-import { OrganizationDialog, type OrganizationDialogProps } from "./OrganizationDialog";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
+import { boardOrganization } from "../../../../../packages/workbench-core/src/teams/organization/organization.fixture.ts";
+import { OrganizationDialog, type OrganizationDialogProps } from "./OrganizationDialog.tsx";
 
 configure({ testIdAttribute: "data-node-id" });
 

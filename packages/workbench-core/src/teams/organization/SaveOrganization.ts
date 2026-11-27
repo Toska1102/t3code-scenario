@@ -34,6 +34,7 @@ export interface SaveOrganizationCommand {
   organization: OrganizationDraft;
 }
 
+// @effect-diagnostics-next-line extendsNativeError:off -- Domain errors are shared with the browser.
 export class OrganizationInvalidError extends Error {
   readonly issues: OrganizationIssue[];
   constructor(issues: OrganizationIssue[]) {
@@ -43,6 +44,7 @@ export class OrganizationInvalidError extends Error {
   }
 }
 
+// @effect-diagnostics-next-line extendsNativeError:off -- The repository exposes this conflict through its Promise port.
 export class RevisionConflictError extends Error {
   readonly expectedRevision: number;
   readonly currentRevision: number;

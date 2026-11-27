@@ -1,6 +1,7 @@
+// @effect-diagnostics nodeBuiltinImport:off -- This filesystem adapter works with local project files.
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
-import type { ProjectRecord, ProjectStore } from "./store.ts";
+import type { ProjectRecord, ProjectStore } from "../../../../workbench-core/src/projects/store.ts";
 
 interface PersistedState {
   projects: ProjectRecord[];

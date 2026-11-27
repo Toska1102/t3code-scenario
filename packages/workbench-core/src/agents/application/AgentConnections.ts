@@ -20,12 +20,14 @@ export type AgentConnectionErrorCode =
   | "duplicate_model_id"
   | "probe_unconfigured";
 
+// @effect-diagnostics-next-line extendsNativeError:off -- This error also crosses the framework-independent browser gateway.
 export class AgentConnectionError extends Error {
-  constructor(
-    readonly code: AgentConnectionErrorCode,
-    readonly field?: string,
-  ) {
+  readonly code: AgentConnectionErrorCode;
+  readonly field: string | undefined;
+  constructor(code: AgentConnectionErrorCode, field?: string) {
     super(code);
+    this.code = code;
+    this.field = field;
     this.name = "AgentConnectionError";
   }
 }
@@ -156,7 +158,7 @@ export class AgentConnections {
         checkedAt: outcome.checkedAt,
         status: outcome.status,
         message: outcome.message,
-        modelsDiscovered: outcome.modelsDiscovered,
+        ...(outcome.modelsDiscovered ? { modelsDiscovered: outcome.modelsDiscovered } : {}),
       };
     });
     return outcome;

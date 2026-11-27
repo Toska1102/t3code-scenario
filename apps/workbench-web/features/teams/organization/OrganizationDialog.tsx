@@ -1,7 +1,7 @@
 // 组织架构弹窗（画板 01.02）。仅依赖 React；团队、人员、Agent 实例与保存
 // 行为全部经 props 注入，保存权威校验在服务端。挂载入口见 ./index.ts。
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { parseImportedOrganization, serializeOrganizationForExport } from "./organizationImport";
+import { parseImportedOrganization, serializeOrganizationForExport } from "./organizationImport.ts";
 import {
   MAX_LAYERS,
   organizationLayers,
@@ -12,7 +12,7 @@ import {
   type OrganizationIssue,
   type OrgNode,
   type ReviewRule,
-} from "../../../../../packages/workbench-core/src/teams/organization/index";
+} from "../../../../../packages/workbench-core/src/teams/organization/index.ts";
 
 export interface PersonRef {
   id: string;

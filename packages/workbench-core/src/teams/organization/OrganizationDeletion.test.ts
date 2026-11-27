@@ -1,11 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import {
   descendantsOf,
   previewNodeDeletion,
   removeNodes,
   validateOrganization,
-} from "./Organization";
-import { boardOrganization } from "./Organization.test";
+} from "./Organization.ts";
+import { boardOrganization } from "./organization.fixture.ts";
 
 describe("Node deletion (story 9)", () => {
   it("refuses to delete the root", () => {

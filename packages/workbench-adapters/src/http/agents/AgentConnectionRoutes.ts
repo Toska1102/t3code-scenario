@@ -37,8 +37,34 @@ function draftFromBody(body: unknown): { draft?: AgentInstanceDraft } | undefine
   if (draft === undefined) return {};
   if (typeof draft !== "object" || draft === null) return undefined;
   const { launch, envVars } = draft as { launch?: unknown; envVars?: unknown };
-  if (typeof launch !== "object" || launch === null || !Array.isArray(envVars)) return undefined;
-  return { draft: { launch, envVars: envVars as AgentInstanceDraft["envVars"] } };
+  if (
+    typeof launch !== "object" ||
+    launch === null ||
+    Array.isArray(launch) ||
+    !Array.isArray(envVars)
+  )
+    return undefined;
+  const fields = new Set([
+    "executable",
+    "args",
+    "configDir",
+    "compressionThreshold",
+    "idleCompression",
+  ]);
+  if (Object.entries(launch).some(([key, value]) => !fields.has(key) || typeof value !== "string"))
+    return undefined;
+  if (
+    !envVars.every(
+      (entry) =>
+        entry !== null &&
+        typeof entry === "object" &&
+        typeof entry.name === "string" &&
+        typeof entry.value === "string" &&
+        typeof entry.secret === "boolean",
+    )
+  )
+    return undefined;
+  return { draft: { launch, envVars } };
 }
 
 function booleanFromBody(body: unknown, field: string): boolean | undefined {
@@ -46,7 +72,7 @@ function booleanFromBody(body: unknown, field: string): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
 
-export function createAgentConnectionRoutes(service: AgentConnections): WorkbenchRoute[] {
+export function createAgentConnectionRoutes(service: AgentConnectionsGateway): WorkbenchRoute[] {
   const json = (status: number, body: unknown): WorkbenchHttpResponse => ({ status, body });
   const snapshot = async () => json(200, await service.getSnapshot());
 

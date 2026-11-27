@@ -79,6 +79,7 @@ export function openOrganizationRepository(db: NodeSqlite.DatabaseSync, actor: s
         }
         const revision = currentRevision + 1;
         insert.run(teamId, revision, JSON.stringify(data), actor);
+        // @effect-diagnostics-next-line globalDate:off -- The SQLite adapter records its wall-clock commit timestamp.
         update.run(data.team.name, data.team.description, new Date().toISOString(), actor, teamId);
         db.exec("COMMIT");
         return { revision };

@@ -2,11 +2,11 @@
 //   import { OrganizationDialog } from '.../features/teams/organization';
 //   <OrganizationDialog team={team} revision={revision} organization={org}
 //     people={people} agentInstances={instances} onSave={save} onClose={close} />
-export { OrganizationDialog } from "./OrganizationDialog";
+export { OrganizationDialog } from "./OrganizationDialog.tsx";
 export type {
   OrganizationDialogProps,
   PersonRef,
   AgentInstanceRef,
   SaveOrganizationPayload,
   SaveOrganizationResult,
-} from "./OrganizationDialog";
+} from "./OrganizationDialog.tsx";

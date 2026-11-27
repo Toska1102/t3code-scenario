@@ -110,10 +110,11 @@ export function isModelDispatchable(model: AgentInstanceModel): boolean {
  * unavailable (availability count and default choice are independent).
  */
 export function summarizeInstances(instances: AgentInstance[]): AgentDeviceSummary {
+  const defaultInstance = instances.find((instance) => instance.isDefault);
   return {
     totalCount: instances.length,
     availableCount: instances.filter(isInstanceAvailable).length,
-    defaultInstanceId: instances.find((instance) => instance.isDefault)?.instanceId,
+    ...(defaultInstance ? { defaultInstanceId: defaultInstance.instanceId } : {}),
     instances: instances.map(redactInstance),
   };
 }
@@ -135,6 +136,6 @@ export function redactInstance(instance: AgentInstance): AgentInstanceView {
       value: envVar.secret ? SECRET_MASK : envVar.value,
     })),
     models: instance.models,
-    lastCheck: instance.lastCheck,
+    ...(instance.lastCheck ? { lastCheck: instance.lastCheck } : {}),
   };
 }

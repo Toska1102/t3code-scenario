@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off -- This filesystem adapter works with local project files.
 import { describe, expect, it } from "vite-plus/test";
 import * as NodeFS from "node:fs";
 import * as NodeOS from "node:os";

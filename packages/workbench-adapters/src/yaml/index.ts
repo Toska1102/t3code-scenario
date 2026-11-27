@@ -3,5 +3,5 @@ export {
   ORGANIZATION_YAML_FORMAT_VERSION,
   parseOrganizationYaml,
   serializeOrganizationYaml,
-} from "./organizationYaml";
-export type { ParseOrganizationYamlResult } from "./organizationYaml";
+} from "./organizationYaml.ts";
+export type { ParseOrganizationYamlResult } from "./organizationYaml.ts";

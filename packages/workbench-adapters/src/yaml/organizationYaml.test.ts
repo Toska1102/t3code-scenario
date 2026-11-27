@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { stringify } from "yaml";
-import { parseOrganizationYaml, serializeOrganizationYaml } from "./organizationYaml";
-import { boardOrganization } from "../../../workbench-core/src/teams/organization/Organization.test";
+import { parseOrganizationYaml, serializeOrganizationYaml } from "./organizationYaml.ts";
+import { boardOrganization } from "../../../workbench-core/src/teams/organization/organization.fixture.ts";
 
 describe("Organization YAML round trip (story 13)", () => {
   it("exports structure, rules and constraints with a format version", () => {

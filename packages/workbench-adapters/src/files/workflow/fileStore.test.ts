@@ -1,9 +1,10 @@
+// @effect-diagnostics nodeBuiltinImport:off -- This filesystem adapter works with local project files.
 import { describe, expect, it } from "vite-plus/test";
 import * as NodeFS from "node:fs";
 import * as NodeOS from "node:os";
 import * as NodePath from "node:path";
 import { createFileWorkflowStore } from "./fileStore.ts";
-import type { WorkflowDraft } from "../../../workbench-contracts/src/workflow/types.ts";
+import type { WorkflowDraft } from "../../../../workbench-contracts/src/workflow/types.ts";
 
 function draft(id: string, revision = 1): WorkflowDraft {
   return {

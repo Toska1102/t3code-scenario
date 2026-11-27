@@ -1,12 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
-import { boardOrganization } from "./Organization.test";
+import { describe, expect, it, vi } from "vite-plus/test";
+import { boardOrganization } from "./organization.fixture.ts";
 import {
   OrganizationInvalidError,
   RevisionConflictError,
   type OrganizationRepository,
   type SaveOrganizationCommand,
   createOrganizationService,
-} from "./SaveOrganization";
+} from "./SaveOrganization.ts";
 
 const savedRevisions: number[] = [];
 const repository: OrganizationRepository = {

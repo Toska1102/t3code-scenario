@@ -3,13 +3,13 @@ export {
   createOrganizationService,
   OrganizationInvalidError,
   RevisionConflictError,
-} from "./SaveOrganization";
+} from "./SaveOrganization.ts";
 export type {
   OrganizationRepository,
   SaveOrganizationCommand,
   StoredOrganization,
   TeamInfo,
-} from "./SaveOrganization";
+} from "./SaveOrganization.ts";
 export {
   MAX_LAYERS,
   isOrganizationValid,
@@ -20,7 +20,7 @@ export {
   childrenOf,
   descendantsOf,
   findNode,
-} from "./Organization";
+} from "./Organization.ts";
 export type {
   OrganizationDraft,
   OrganizationIssue,
@@ -31,4 +31,4 @@ export type {
   OrgNodeType,
   ReviewRule,
   DeletePreview,
-} from "./Organization";
+} from "./Organization.ts";

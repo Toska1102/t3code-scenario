@@ -35,6 +35,8 @@ const listProjects = Effect.gen(function* () {
 const showProject = Effect.gen(function* () {
   const projects = yield* Projects.Projects;
   const { id } = yield* HttpRouter.params;
+  if (id === undefined)
+    return failure(400, { code: "invalid_request", message: "Project ID is required." });
   const project = yield* projects.findById(id);
   if (project === null) {
     return failure(404, {
@@ -87,6 +89,8 @@ const updateProject = Effect.gen(function* () {
   const projects = yield* Projects.Projects;
   const { subject } = yield* WorkbenchActor.WorkbenchActor;
   const { id } = yield* HttpRouter.params;
+  if (id === undefined)
+    return failure(400, { code: "invalid_request", message: "Project ID is required." });
   const input = yield* decodeBody(WorkbenchProjects.UpdateProjectRequest);
   const project = yield* projects.update(id, {
     name: input.name,

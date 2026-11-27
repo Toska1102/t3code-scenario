@@ -3,8 +3,8 @@
 import {
   parseOrganizationYaml,
   serializeOrganizationYaml,
-} from "../../../../../packages/workbench-adapters/src/yaml/organizationYaml";
-import type { OrganizationDraft } from "../../../../../packages/workbench-core/src/teams/organization/index";
+} from "../../../../../packages/workbench-adapters/src/yaml/organizationYaml.ts";
+import type { OrganizationDraft } from "../../../../../packages/workbench-core/src/teams/organization/index.ts";
 
 export function parseImportedOrganization(
   text: string,

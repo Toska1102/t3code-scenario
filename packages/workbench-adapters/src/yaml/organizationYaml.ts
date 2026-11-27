@@ -7,9 +7,9 @@ import type {
   OrgNode,
   OrgNodeType,
   ReviewRule,
-} from "../../../workbench-core/src/teams/organization/Organization";
-import { validateOrganization } from "../../../workbench-core/src/teams/organization/Organization";
-import type { TeamInfo } from "../../../workbench-core/src/teams/organization/SaveOrganization";
+} from "../../../workbench-core/src/teams/organization/Organization.ts";
+import { validateOrganization } from "../../../workbench-core/src/teams/organization/Organization.ts";
+import type { TeamInfo } from "../../../workbench-core/src/teams/organization/SaveOrganization.ts";
 
 export const ORGANIZATION_YAML_FORMAT_VERSION = 1;
 

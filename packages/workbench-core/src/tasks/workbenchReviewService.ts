@@ -21,6 +21,7 @@ export type WorkbenchReviewErrorCode =
   | "blank_reason"
   | "invalid_return_target";
 
+// @effect-diagnostics-next-line extendsNativeError:off -- The review port is shared with synchronous repository adapters.
 export class WorkbenchReviewError extends Error {
   readonly code: WorkbenchReviewErrorCode;
   constructor(code: WorkbenchReviewErrorCode, message: string) {
@@ -69,6 +70,7 @@ export interface DecideReviewActor {
 
 export function createWorkbenchReviewService(options: CreateWorkbenchReviewServiceOptions) {
   const { store } = options;
+  // @effect-diagnostics-next-line globalDate:off -- The clock can be supplied by the caller.
   const now = options.now ?? (() => new Date().toISOString());
   const emit = (event: WorkbenchReviewEvent) => options.onEvent?.(event);
 
@@ -86,6 +88,7 @@ export function createWorkbenchReviewService(options: CreateWorkbenchReviewServi
     );
     for (const step of state.task.steps) {
       const run = state.stepRuns[step.stepId];
+      if (!run) throw new WorkbenchReviewError("unknown_step", `Unknown step: ${step.stepId}`);
       // The execution engine drives plain steps; only review steps open on join.
       if (!step.reviewerId || run.status !== "pending") continue;
       if (!isReviewReady(state.task, step.stepId, succeeded)) continue;
@@ -182,6 +185,7 @@ export function createWorkbenchReviewService(options: CreateWorkbenchReviewServi
         record.decidedAt = now();
         decided = record;
         const run = state.stepRuns[input.stepId];
+        if (!run) throw new WorkbenchReviewError("unknown_step", `Unknown step: ${input.stepId}`);
         if (input.decision === "approve") {
           record.status = "approved";
           run.status = "approved";
@@ -243,6 +247,7 @@ function applyReturn(
   }
   for (const stepId of invalidated) {
     const previous = state.stepRuns[stepId];
+    if (!previous) throw new WorkbenchReviewError("unknown_step", `Unknown step: ${stepId}`);
     const next = context.attemptCreated(previous);
     state.stepRuns[stepId] = { ...next, stepId, status: "pending" };
     context.emit({

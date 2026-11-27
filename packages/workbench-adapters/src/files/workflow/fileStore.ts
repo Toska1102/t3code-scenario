@@ -1,10 +1,11 @@
+// @effect-diagnostics nodeBuiltinImport:off -- This filesystem adapter works with local project files.
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
 import type {
   WorkflowDraft,
   WorkflowVersionRecord,
-} from "../../../workbench-contracts/src/workflow/types.ts";
-import type { WorkflowStore } from "./store.ts";
+} from "../../../../workbench-contracts/src/workflow/types.ts";
+import type { WorkflowStore } from "../../../../workbench-core/src/workflow/store.ts";
 
 /**
  * JSON-file persistence for the standalone workbench server: drafts are whole

@@ -18,5 +18,9 @@
     "@t3tools/workbench-core": "workspace:*",
     "effect": "catalog:",
     "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "vite-plus": "catalog:"
   }
 }
