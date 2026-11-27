@@ -180,6 +180,8 @@ export default defineConfig({
   },
   fmt: {
     ignorePatterns: [
+      // Keep native Pencil exports identical to the visual acceptance baseline.
+      "docs/design-html/**",
       ".repos/**",
       "infra/task-cache/vendor/**",
       // Macroscope requires one glob per line; Markdown formatting corrupts it.
