@@ -3,6 +3,7 @@ import type {
   OrchestrationV2ThreadLaunchWorkspaceStrategy,
   ProviderInteractionMode,
   RuntimeMode,
+  WorkflowAgentLimits,
 } from "@t3tools/contracts";
 import { isWindowsDrivePath } from "@t3tools/shared/path";
 import * as Context from "effect/Context";
@@ -12,9 +13,23 @@ import * as Schema from "effect/Schema";
 
 import type { IssueAddress } from "./WorkflowForge.ts";
 
+export const WorkflowProviderIssue = Schema.Struct({
+  step: Schema.String,
+  instanceId: Schema.UndefinedOr(Schema.String),
+  reason: Schema.Literals([
+    "invalid_limits",
+    "instance_required",
+    "remote_limits_unsupported",
+    "instance_unavailable",
+    "tool_allowlist_unsupported",
+    "total_token_limit_unsupported",
+  ]),
+});
+export type WorkflowProviderIssue = typeof WorkflowProviderIssue.Type;
+
 export class WorkflowAgentError extends Schema.TaggedError<WorkflowAgentError>()(
   "WorkflowAgentError",
-  { reason: Schema.String },
+  { reason: Schema.String, issues: Schema.optional(Schema.Array(WorkflowProviderIssue)) },
 ) {
   override get message(): string {
     return this.reason;
@@ -94,6 +109,7 @@ export class WorkflowAgents extends Context.Service<
       readonly issue?: IssueAddress | undefined;
       /** How a new thread starts. Refused with `thread`, which keeps how it started. */
       readonly launch?: AgentLaunch | undefined;
+      readonly limits?: WorkflowAgentLimits | undefined;
     }) => Effect.Effect<AgentTurn, WorkflowAgentError>;
     /**
      * Wait for the turn to end and return what it produced. With `quiet`, a turn that ended

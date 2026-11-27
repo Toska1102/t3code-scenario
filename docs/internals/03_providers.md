@@ -48,6 +48,12 @@ and permission claims match what the protocol can enforce.
   not fake a mode by auto-answering approvals in T3. Unoffered stored modes fall back to Supervised.
   Pass native approval and question option IDs through unchanged, and ensure every request can be
   declined.
+- **Workflow hard limits need their own enforcement.** A successful CLI prompt and resume probe,
+  or `runtimePolicy.enforcement: native`, does not prove a per-step tool allowlist or a total
+  input-and-output token budget. The current T3 turn and peer-launch interfaces cannot carry these
+  limits, so [constrained workflow steps](../../apps/server/src/workflows/WorkflowProviderChecks.ts)
+  are blocked before launch. Output-only limits, context windows, USD budgets, prompt instructions,
+  and stopping after a usage notification are not substitutes for a total-token hard limit.
 - **Hide plan mode unless it produces proposed-plan cards.**
 - **Startup phases come from real signals.** An adapter reports the step a starting turn is on as
   `startupPhase` on its provider session, and only when the protocol says so: a notification or an
