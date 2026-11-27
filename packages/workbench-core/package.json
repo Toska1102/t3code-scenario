@@ -1,0 +1,20 @@
+{
+  "name": "@t3tools/workbench-core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./redispatch/types": "./src/redispatch/types.ts",
+    "./redispatch/redispatch": "./src/redispatch/redispatch.ts",
+    "./redispatch/orgCompatibility": "./src/redispatch/orgCompatibility.ts",
+    "./redispatch/dispatchSubmission": "./src/redispatch/dispatchSubmission.ts",
+    "./redispatch/invocations": "./src/redispatch/invocations.ts"
+  },
+  "scripts": {
+    "typecheck": "effect-tsgo tsrs --noEmit",
+    "test": "vp test run --config ../../vite.config.ts --dir ."
+  },
+  "devDependencies": {
+    "@effect/vitest": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}
