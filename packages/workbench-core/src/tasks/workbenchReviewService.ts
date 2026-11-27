@@ -18,6 +18,8 @@ export type WorkbenchReviewErrorCode =
   | "unknown_task"
   | "unknown_step"
   | "review_not_open"
+  | "idempotency_conflict"
+  | "invalid_step_completion"
   | "blank_reason"
   | "invalid_return_target";
 
@@ -61,6 +63,7 @@ export interface DecideReviewInput {
   decision: "approve" | "return";
   reason?: string;
   returnToStepId?: string;
+  requestId?: string;
 }
 
 export interface DecideReviewActor {
@@ -72,7 +75,21 @@ export function createWorkbenchReviewService(options: CreateWorkbenchReviewServi
   const { store } = options;
   // @effect-diagnostics-next-line globalDate:off -- The clock can be supplied by the caller.
   const now = options.now ?? (() => new Date().toISOString());
-  const emit = (event: WorkbenchReviewEvent) => options.onEvent?.(event);
+
+  function mutateTask(
+    taskId: string,
+    mutate: (
+      state: WorkbenchTaskReviewState,
+      emit: (event: WorkbenchReviewEvent) => void,
+    ) => WorkbenchTaskReviewState,
+  ) {
+    const events: WorkbenchReviewEvent[] = [];
+    const next = store.mutateTask(taskId, (state) =>
+      mutate(state, (event) => events.push(structuredClone(event))),
+    );
+    for (const event of events) options.onEvent?.(event);
+    return next;
+  }
 
   function requireTask(taskId: string): WorkbenchTaskReviewState {
     const state = store.getTask(taskId);
@@ -80,7 +97,10 @@ export function createWorkbenchReviewService(options: CreateWorkbenchReviewServi
     return state;
   }
 
-  function settleReadySteps(state: WorkbenchTaskReviewState): WorkbenchTaskReviewState {
+  function settleReadySteps(
+    state: WorkbenchTaskReviewState,
+    emit: (event: WorkbenchReviewEvent) => void,
+  ): WorkbenchTaskReviewState {
     const succeeded = new Set(
       Object.values(state.stepRuns)
         .filter((run) => run.status === "succeeded" || run.status === "approved")
@@ -123,12 +143,22 @@ export function createWorkbenchReviewService(options: CreateWorkbenchReviewServi
     },
 
     /** Execution engine reports a step output; opens the review once the join is satisfied. */
-    completeStep(input: { taskId: string; stepId: string }): void {
-      store.mutateTask(input.taskId, (state) => {
+    completeStep(input: { taskId: string; stepId: string; attempt?: number }): void {
+      requireTask(input.taskId);
+      mutateTask(input.taskId, (state, emit) => {
         const run = state.stepRuns[input.stepId];
         if (!run) throw new WorkbenchReviewError("unknown_step", `Unknown step: ${input.stepId}`);
+        if (
+          findStep(state.task, input.stepId)?.reviewerId ||
+          (input.attempt !== undefined && input.attempt !== run.attempt)
+        ) {
+          throw new WorkbenchReviewError(
+            "invalid_step_completion",
+            "Only the current execution attempt can complete a plain step",
+          );
+        }
         run.status = "succeeded";
-        return settleReadySteps(state);
+        return settleReadySteps(state, emit);
       });
     },
 
@@ -168,14 +198,41 @@ export function createWorkbenchReviewService(options: CreateWorkbenchReviewServi
     decideReview(input: DecideReviewInput, actor: DecideReviewActor): WorkbenchReviewRecord {
       requireTask(input.taskId);
       let decided: WorkbenchReviewRecord | undefined;
-      store.mutateTask(input.taskId, (state) => {
+      mutateTask(input.taskId, (state, emit) => {
+        const receipt = input.requestId
+          ? state.reviews.find((review) => review.requestId === input.requestId)
+          : undefined;
+        if (receipt) {
+          if (
+            receipt.stepId !== input.stepId ||
+            receipt.attempt !== input.attempt ||
+            receipt.status !== (input.decision === "approve" ? "approved" : "returned") ||
+            receipt.decidedByActorId !== actor.actorId ||
+            (input.decision === "return" &&
+              (receipt.reason !== input.reason || receipt.returnToStepId !== input.returnToStepId))
+          ) {
+            throw new WorkbenchReviewError(
+              "idempotency_conflict",
+              "Request ID already belongs to another decision",
+            );
+          }
+          decided = receipt;
+          return state;
+        }
         const step = findStep(state.task, input.stepId);
         if (!step) throw new WorkbenchReviewError("unknown_step", `Unknown step: ${input.stepId}`);
         const record = state.reviews.find(
           (candidate) => candidate.stepId === input.stepId && candidate.attempt === input.attempt,
         );
         // The compare-and-set: only an open record at the exact (step, attempt) key commits.
-        if (!record || record.status !== "open") {
+        const run = state.stepRuns[input.stepId];
+        if (
+          !record ||
+          !run ||
+          record.status !== "open" ||
+          run.attempt !== input.attempt ||
+          run.status !== "waitingReview"
+        ) {
           throw new WorkbenchReviewError(
             "review_not_open",
             `Review ${input.stepId} attempt ${input.attempt} is not open`,
@@ -183,9 +240,8 @@ export function createWorkbenchReviewService(options: CreateWorkbenchReviewServi
         }
         record.decidedByActorId = actor.actorId;
         record.decidedAt = now();
+        if (input.requestId) record.requestId = input.requestId;
         decided = record;
-        const run = state.stepRuns[input.stepId];
-        if (!run) throw new WorkbenchReviewError("unknown_step", `Unknown step: ${input.stepId}`);
         if (input.decision === "approve") {
           record.status = "approved";
           run.status = "approved";
@@ -211,7 +267,7 @@ export function createWorkbenchReviewService(options: CreateWorkbenchReviewServi
           });
         }
         emit({ type: "review.decided", payload: record });
-        return state;
+        return settleReadySteps(state, emit);
       });
       return decided!;
     },
@@ -248,6 +304,9 @@ function applyReturn(
   for (const stepId of invalidated) {
     const previous = state.stepRuns[stepId];
     if (!previous) throw new WorkbenchReviewError("unknown_step", `Unknown step: ${stepId}`);
+    for (const review of state.reviews) {
+      if (review.stepId === stepId && review.status === "open") review.status = "invalidated";
+    }
     const next = context.attemptCreated(previous);
     state.stepRuns[stepId] = { ...next, stepId, status: "pending" };
     context.emit({
