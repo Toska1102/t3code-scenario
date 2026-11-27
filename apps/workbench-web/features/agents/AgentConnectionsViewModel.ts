@@ -1,8 +1,8 @@
 import type {
-  AgentConnections,
   AgentInstanceDraft,
   ConnectionCheckOutcome,
 } from "../../../../packages/workbench-core/src/agents/application/AgentConnections.ts";
+import type { AgentConnectionsGateway } from "../../../../packages/workbench-core/src/agents/application/AgentConnectionsGateway.ts";
 import type {
   AgentDeviceSummary,
   AgentEnvVar,
@@ -10,15 +10,18 @@ import type {
 } from "../../../../packages/workbench-core/src/agents/domain/AgentAvailability.ts";
 
 export interface AgentConnectionsViewModelOptions {
-  service: AgentConnections;
+  gateway: AgentConnectionsGateway;
 }
 
 /**
  * Dialog state for the Agent connection boards (05.01–05.03). Each instance
  * keeps its own draft while the user switches between Pi, Codex and Claude
  * Code; saving, discarding and closing follow the shared modal exit rules.
+ * Depends on the gateway port so the dialog runs unchanged over HTTP.
  */
-export function createAgentConnectionsViewModel({ service }: AgentConnectionsViewModelOptions) {
+export function createAgentConnectionsViewModel({
+  gateway: service,
+}: AgentConnectionsViewModelOptions) {
   let summary: AgentDeviceSummary = { totalCount: 0, availableCount: 0, instances: [] };
   let selectedInstanceId = "";
   const drafts = new Map<string, AgentInstanceDraft>();
@@ -96,6 +99,18 @@ export function createAgentConnectionsViewModel({ service }: AgentConnectionsVie
       lastChecks.set(instanceId, outcome);
       summary = await service.getSnapshot();
       return outcome;
+    },
+
+    async addCustomModel(instanceId: string, modelId: string) {
+      summary = await service.addCustomModel(instanceId, modelId);
+    },
+
+    async setModelEnabled(instanceId: string, modelId: string, enabled: boolean) {
+      summary = await service.setModelEnabled(instanceId, modelId, enabled);
+    },
+
+    async setModelFavorite(instanceId: string, modelId: string, favorite: boolean) {
+      summary = await service.setModelFavorite(instanceId, modelId, favorite);
     },
   };
 }

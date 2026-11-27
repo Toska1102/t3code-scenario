@@ -65,16 +65,18 @@ export class AgentConnections {
   }
 
   /**
-   * Persists the editable draft of one instance. A secret whose value comes
-   * back masked keeps the stored value: plaintext never round-trips through
-   * the client.
+   * Persists the editable draft of one instance. The mask is a sentinel the
+   * client holds in place of plaintext: a masked value keeps the stored
+   * secret under the same name, starts empty under a new name, and may not
+   * be demoted to non-secret (that would store the mask as plaintext).
    */
   async saveInstance(instanceId: string, draft: AgentInstanceDraft): Promise<AgentDeviceSummary> {
     validateEnvVars(draft.envVars);
     await this.#mutate(instanceId, (instance) => {
       instance.launch = draft.launch;
       instance.envVars = draft.envVars.map((envVar) => {
-        if (!envVar.secret || envVar.value !== SECRET_MASK) return { ...envVar };
+        if (envVar.value !== SECRET_MASK) return { ...envVar };
+        if (!envVar.secret) throw new AgentConnectionError("invalid_env_var", envVar.name);
         const stored = instance.envVars.find((candidate) => candidate.name === envVar.name);
         return { ...envVar, value: stored?.value ?? "" };
       });
@@ -127,7 +129,15 @@ export class AgentConnections {
     const draft = input.draft;
     if (draft) validateEnvVars(draft.envVars);
     const launch = draft ? draft.launch : instance.launch;
-    const envVars = draft ? draft.envVars : instance.envVars;
+    // The draft carries masked secrets; probe with the stored values instead
+    // so a draft check can actually authenticate.
+    const envVars = draft
+      ? draft.envVars.map((envVar) => {
+          if (envVar.value !== SECRET_MASK) return envVar;
+          const stored = instance.envVars.find((candidate) => candidate.name === envVar.name);
+          return { ...envVar, value: stored?.value ?? "" };
+        })
+      : instance.envVars;
     const fromDraft = draft !== undefined;
 
     const result = await this.#probe.probe({
