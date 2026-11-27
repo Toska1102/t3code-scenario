@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off -- The restart test launches a separate Node process on a temporary SQLite file.
 import * as NodeAssert from "node:assert/strict";
 import * as NodeChildProcess from "node:child_process";
 import * as NodeEvents from "node:events";

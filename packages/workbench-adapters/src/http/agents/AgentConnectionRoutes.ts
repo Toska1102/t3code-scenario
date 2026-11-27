@@ -86,32 +86,25 @@ export function createAgentConnectionRoutes(service: AgentConnectionsGateway): W
       method: "PATCH",
       pattern: /^\/workbench\/agents\/([^/]+)$/,
       handle: async (request, [instanceId]) => {
-        const { launch, envVars } = (request.body ?? {}) as {
-          launch?: unknown;
-          envVars?: unknown;
-        };
-        if (typeof launch !== "object" || launch === null || !Array.isArray(envVars)) {
-          return invalidRequest(Array.isArray(envVars) ? undefined : "envVars");
-        }
-        return json(
-          200,
-          await service.saveInstance(instanceId, {
-            launch: launch as AgentInstanceDraft["launch"],
-            envVars: envVars as AgentInstanceDraft["envVars"],
-          }),
-        );
+        if (!instanceId) return invalidRequest("instanceId");
+        const input = draftFromBody({ draft: request.body });
+        if (!input?.draft) return invalidRequest("envVars");
+        return json(200, await service.saveInstance(instanceId, input.draft));
       },
     },
     {
       method: "POST",
       pattern: /^\/workbench\/agents\/([^/]+)\/default$/,
       handle: async (_request, [instanceId]) =>
-        json(200, await service.setDefaultInstance(instanceId)),
+        instanceId
+          ? json(200, await service.setDefaultInstance(instanceId))
+          : invalidRequest("instanceId"),
     },
     {
       method: "POST",
       pattern: /^\/workbench\/agents\/([^/]+)\/enabled$/,
       handle: async (request, [instanceId]) => {
+        if (!instanceId) return invalidRequest("instanceId");
         const enabled = booleanFromBody(request.body, "enabled");
         if (enabled === undefined) return invalidRequest("enabled");
         return json(200, await service.setInstanceEnabled(instanceId, enabled));
@@ -121,6 +114,7 @@ export function createAgentConnectionRoutes(service: AgentConnectionsGateway): W
       method: "POST",
       pattern: /^\/workbench\/agents\/([^/]+)\/check$/,
       handle: async (request, [instanceId]) => {
+        if (!instanceId) return invalidRequest("instanceId");
         const input = draftFromBody(request.body);
         if (input === undefined) return invalidRequest("draft");
         return json(200, await service.checkConnection(instanceId, input));
@@ -130,6 +124,7 @@ export function createAgentConnectionRoutes(service: AgentConnectionsGateway): W
       method: "POST",
       pattern: /^\/workbench\/agents\/([^/]+)\/models$/,
       handle: async (request, [instanceId]) => {
+        if (!instanceId) return invalidRequest("instanceId");
         const modelId = (request.body as { modelId?: unknown } | undefined)?.modelId;
         if (typeof modelId !== "string") return invalidRequest("modelId");
         return json(200, await service.addCustomModel(instanceId, modelId));
@@ -139,14 +134,14 @@ export function createAgentConnectionRoutes(service: AgentConnectionsGateway): W
       method: "PATCH",
       pattern: /^\/workbench\/agents\/([^/]+)\/models\/([^/]+)$/,
       handle: async (request, [instanceId, modelId]) => {
+        if (!instanceId || !modelId) return invalidRequest();
         const enabled = booleanFromBody(request.body, "enabled");
         const favorite = booleanFromBody(request.body, "favorite");
-        if (enabled === undefined && favorite === undefined) return invalidRequest();
-        const snapshot =
-          favorite !== undefined
-            ? await service.setModelFavorite(instanceId, modelId, favorite)
-            : await service.setModelEnabled(instanceId, modelId, enabled);
-        return json(200, snapshot);
+        if (favorite !== undefined && enabled === undefined)
+          return json(200, await service.setModelFavorite(instanceId, modelId, favorite));
+        if (enabled !== undefined && favorite === undefined)
+          return json(200, await service.setModelEnabled(instanceId, modelId, enabled));
+        return invalidRequest();
       },
     },
   ];
