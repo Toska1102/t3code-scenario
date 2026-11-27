@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "ES2024.Promise", "ESNext.Disposable", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "plugins": [
+      {
+        "name": "@effect/language-service",
+        "diagnosticSeverity": {
+          "globalFetch": "off"
+        }
+      }
+    ]
+  },
+  "include": ["src", "test", "vite.config.ts"]
+}
