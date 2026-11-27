@@ -1,0 +1,33 @@
+P01 UNSAT (P01_blankName_given, P01_validProject_given, P01_decision); revised scenario SAT. A whitespace-only name cannot produce a project. A team is optional.
+P02 UNSAT (P02_movedTeam_given, P02_historicalTeamChanged_given, P02_decision); revised scenario SAT. Moving the project affects new tasks and preserves historical attribution.
+P03 UNSAT (P03_unauthenticated_given, P03_writeAccepted_given, P03_decision); revised scenario SAT. Every authenticated admin may write. Anonymous calls may not.
+A01 UNSAT (A01_historicalRun_given, A01_autoUpgradeVersion_given, A01_decision); revised scenario SAT. A historical task uses the exact pinned workflow version.
+A02 UNSAT (A02_rolledBack_given, A02_engineStarted_given, A02_decision); revised scenario SAT. T3 starts after the business transaction commits.
+A03 UNSAT (A03_noSavedResult_given, A03_taskCompleted_given, A03_decision); revised scenario SAT. Completion requires a saved formal result.
+A04 UNSAT (A04_returnedAttempt_given, A04_reusedApproval_given, A04_decision); revised scenario SAT. Returning a dependent output invalidates its approval.
+A05 UNSAT (A05_sameDispatchKey_given, A05_differentTasks_given, A05_decision); revised scenario SAT. Retrying a dispatch key yields the same registered task.
+D01 UNSAT (D01_agentOffline_given, D01_confirmationBlockedSolelyByHealth_given, D01_decision); revised scenario SAT. Confirmation evaluates structure. Dispatch evaluates live availability.
+D02 UNSAT (D02_orgChangedAfterPreview_given, D02_usedPreviewRevision_given, D02_decision); revised scenario SAT. Dispatch validates and records the same current organization revision.
+D03 UNSAT (D03_deputyActs_given, D03_deputyOwnsTodo_given, D03_decision); revised scenario SAT. The assigned reviewer retains ownership until resolution. The deputy is audited separately.
+D04 UNSAT (D04_assignedToSomeoneElse_given, D04_countedInMyTodo_given, D04_decision); revised scenario SAT. Each personal task count uses the assigned reviewer.
+D06 UNSAT (D06_formalResultSaveFailed_given, D06_markedCompleted_given, D06_decision); revised scenario SAT. The task remains pending delivery until the formal result is saved.
+D07 UNSAT (D07_retryDelivery_given, D07_rerunCompletedSteps_given, D07_decision); revised scenario SAT. Retry delivery with existing output and approval.
+D08 UNSAT (D08_sameDispatchSubmission_given, D08_allocatedAnotherTask_given, D08_decision); revised scenario SAT. Unknown response retries reuse the existing receipt.
+D09 UNSAT (D09_instanceStoppedBeforeStep_given, D09_stepStarted_given, D09_decision); revised scenario SAT. A queued step checks current instance availability before launch.
+D10 UNSAT (D10_historicalTask_given, D10_openedLatestVersion_given, D10_decision); revised scenario SAT. Workflow history opens the version recorded by the task.
+D11 UNSAT (D11_resultReadFailed_given, D11_completedTaskReopened_given, D11_decision); revised scenario SAT. A read failure only affects display.
+P04 UNSAT (P04_hardLimitUnenforceable_given, P04_dispatchAccepted_given, P04_decision); revised scenario SAT. Unknown or unsupported required enforcement blocks dispatch.
+R02 UNSAT (R02_publishedVersion_given, R02_updatedStepsInPlace_given, R02_decision); revised scenario SAT. Editing creates a revision and preserves the published version.
+R03 UNSAT (R03_hasNoTeam_given, R03_firstDispatchAccepted_given, R03_decision); revised scenario SAT. Team selection is required to dispatch.
+R04 UNSAT (R04_dispatchedFromDraft_given, R04_createdTaskWithoutPinnedVersion_given, R04_decision); revised scenario SAT. The dispatch transaction confirms the draft and creates the task referencing that version.
+R05 UNSAT (R05_includedOnlyAsAncestor_given, R05_assignedWithoutApplicableDuty_given, R05_decision); revised scenario SAT. The ancestors expand the candidate pool.
+R07 UNSAT (R07_enabledButNotAuthenticated_given, R07_markedAvailable_given, R07_decision); revised scenario SAT. Enabled and authenticated are independent.
+R08 UNSAT (R08_unverifiedModel_given, R08_dispatchWithModelAccepted_given, R08_decision); revised scenario SAT. Dispatch with a custom model requires verification.
+R09 UNSAT (R09_disabledAfterStart_given, R09_activeStepAbortedByDisable_given, R09_decision); revised scenario SAT. Already-started steps use the execution snapshot.
+R10 UNSAT (R10_reviewReturnsWork_given, R10_mutatedPublishedGraph_given, R10_decision); revised scenario SAT. Return creates a new attempt against the same graph.
+R11 UNSAT (R11_switchToDifferentTask_given, R11_sendToOldTaskThread_given, R11_decision); revised scenario SAT. The send route uses the selected task and step IDs.
+R12 UNSAT (R12_directoryRequiredButUnavailable_given, R12_dispatchAccepted_given, R12_decision); revised scenario SAT. A directory is optional unless the workflow requires one.
+R01 UNSAT (first_sample_call_count, second_sample_call_count, one_version_one_count); revised scenario SAT. The exact workflow version has one reverse list with three calls.
+D05 UNSAT (previous_approval, new_output, delivery_requires_current_approval); revised scenario SAT. An approval belongs to a specific attempt.
+R06 UNSAT (branch_b_pending, review_opens, review_waits_for_both_branches); revised scenario SAT. All direct upstream steps must succeed before opening review.
+R13 UNSAT (codex_default, claude_default, at_most_one_default); revised scenario SAT. An environment has at most one default instance.
