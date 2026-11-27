@@ -3,9 +3,20 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./organization-yaml": "./src/yaml/index.ts"
+    "./organization-yaml": "./src/yaml/index.ts",
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "effect-tsgo tsrs --noEmit"
   },
   "dependencies": {
+    "@t3tools/shared": "workspace:*",
+    "@t3tools/workbench-contracts": "workspace:*",
+    "@t3tools/workbench-core": "workspace:*",
+    "effect": "catalog:",
     "yaml": "catalog:"
   }
 }

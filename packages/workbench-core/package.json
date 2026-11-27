@@ -7,11 +7,18 @@
     "./redispatch/redispatch": "./src/redispatch/redispatch.ts",
     "./redispatch/orgCompatibility": "./src/redispatch/orgCompatibility.ts",
     "./redispatch/dispatchSubmission": "./src/redispatch/dispatchSubmission.ts",
-    "./redispatch/invocations": "./src/redispatch/invocations.ts"
+    "./redispatch/invocations": "./src/redispatch/invocations.ts",
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
   },
   "scripts": {
     "typecheck": "effect-tsgo tsrs --noEmit",
     "test": "vp test run --config ../../vite.config.ts --dir ."
+  },
+  "dependencies": {
+    "effect": "catalog:"
   },
   "devDependencies": {
     "@effect/vitest": "catalog:",

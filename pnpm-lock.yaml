@@ -943,6 +943,12 @@ importers:
       '@t3tools/source-control-tanstack-source':
         specifier: workspace:*
         version: link:../../packages/source-control-tanstack-source
+      '@t3tools/workbench-adapters':
+        specifier: workspace:*
+        version: link:../../packages/workbench-adapters
+      '@t3tools/workbench-core':
+        specifier: workspace:*
+        version: link:../../packages/workbench-core
       character-entities:
         specifier: 2.0.2
         version: 2.0.2
@@ -2628,11 +2634,33 @@ importers:
 
   packages/workbench-adapters:
     dependencies:
+      '@t3tools/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@t3tools/workbench-contracts':
+        specifier: workspace:*
+        version: link:../workbench-contracts
+      '@t3tools/workbench-core':
+        specifier: workspace:*
+        version: link:../workbench-core
+      effect:
+        specifier: 4.1.5
+        version: 4.1.5(patch_hash=14a7acd734809d8dddbf2c19c4ec01fdd2ffae60a612de42b5ed29860216052a)
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
 
+  packages/workbench-contracts:
+    dependencies:
+      effect:
+        specifier: 4.1.5
+        version: 4.1.5(patch_hash=14a7acd734809d8dddbf2c19c4ec01fdd2ffae60a612de42b5ed29860216052a)
+
   packages/workbench-core:
+    dependencies:
+      effect:
+        specifier: 4.1.5
+        version: 4.1.5(patch_hash=14a7acd734809d8dddbf2c19c4ec01fdd2ffae60a612de42b5ed29860216052a)
     devDependencies:
       '@effect/vitest':
         specifier: 4.1.5

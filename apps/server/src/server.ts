@@ -247,6 +247,7 @@ import { makePersistedServerRuntimeState } from "./serverRuntimeState.ts";
 import { closeNonPrivateNetworkConnections, loopbackUrlHostForAddress } from "./startupAccess.ts";
 import * as OrchestrationHttp from "./orchestration-v2/http.ts";
 import * as ProjectHttp from "./project/http.ts";
+import * as Workbench from "./workbench/bootstrap.ts";
 import * as NetService from "@t3tools/shared/Net";
 import * as RelayClient from "@t3tools/shared/relayClient";
 import {
@@ -912,6 +913,7 @@ const layerMakeRoutes = Layer.mergeAll(
       Layer.provide(AuthHttp.layerAuthenticatedAuth),
       Layer.provide(ServerHttp.layerApiBodyLimit),
     ),
+    Workbench.layer.pipe(Layer.provide(SqlitePersistence.layerConfig)),
     ServerHttp.layerOtlpTracesProxyRoute,
     ServerHttp.layerDesktopReadinessProofRoute,
     ServerHttp.layerAssetRoute,
