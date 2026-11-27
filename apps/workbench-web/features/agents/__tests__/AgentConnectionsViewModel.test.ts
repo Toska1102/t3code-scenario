@@ -12,7 +12,7 @@ function viewModel() {
     store,
     probe: fakeProbe(),
   });
-  return { store, service, vm: createAgentConnectionsViewModel({ service }) };
+  return { store, service, vm: createAgentConnectionsViewModel({ gateway: service }) };
 }
 
 describe("Agent connections view model", () => {
@@ -109,5 +109,44 @@ describe("Agent connections view model", () => {
     await vm.open();
 
     await expect(vm.setDefault("pi-local")).rejects.toMatchObject({ code: "default_unavailable" });
+  });
+});
+
+describe("Agent connections view model: models", () => {
+  it("addCustomModel appends an unverified model and refreshes the summary", async () => {
+    const { vm } = viewModel();
+    await vm.open();
+
+    await vm.addCustomModel("claude-local", "review-model");
+
+    const models = vm.summary.instances.find((i) => i.instanceId === "claude-local")?.models;
+    expect(models?.some((model) => model.id === "review-model")).toBe(true);
+    expect(models?.find((model) => model.id === "review-model")).toMatchObject({
+      source: "custom",
+      verified: false,
+      enabled: false,
+    });
+  });
+
+  it("setModelEnabled and setModelFavorite update the refreshed summary", async () => {
+    const { vm } = viewModel();
+    await vm.open();
+
+    await vm.setModelEnabled("claude-local", "claude-opus", true);
+    await vm.setModelFavorite("claude-local", "claude-opus", true);
+
+    const opus = vm.summary.instances
+      .find((i) => i.instanceId === "claude-local")
+      ?.models.find((model) => model.id === "claude-opus");
+    expect(opus).toMatchObject({ enabled: true, favorite: true });
+  });
+
+  it("surfaces domain errors without mutating state", async () => {
+    const { vm } = viewModel();
+    await vm.open();
+
+    await expect(vm.addCustomModel("claude-local", "claude sonnet")).rejects.toMatchObject({
+      code: "invalid_model_id",
+    });
   });
 });

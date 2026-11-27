@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import type { AgentConnections } from "../../../../packages/workbench-core/src/agents/application/AgentConnections.ts";
+import type { AgentConnectionsGateway } from "../../../../packages/workbench-core/src/agents/application/AgentConnectionsGateway.ts";
 import {
   SECRET_MASK,
   type AgentEnvVar,
@@ -17,7 +17,8 @@ import {
 } from "./AgentConnectionsViewModel.ts";
 
 export interface AgentConnectionsDialogProps {
-  service: AgentConnections;
+  /** The Agent connections gateway port; the server service satisfies it directly. */
+  gateway: AgentConnectionsGateway;
   open: boolean;
   onClose: () => void;
 }
@@ -27,8 +28,8 @@ export interface AgentConnectionsDialogProps {
  * selected instance's launch config, environment variables and models on the
  * right. One dialog, three selection states.
  */
-export function AgentConnectionsDialog({ service, open, onClose }: AgentConnectionsDialogProps) {
-  const [vm] = useState(() => createAgentConnectionsViewModel({ service }));
+export function AgentConnectionsDialog({ gateway, open, onClose }: AgentConnectionsDialogProps) {
+  const [vm] = useState(() => createAgentConnectionsViewModel({ gateway }));
   const [, render] = useState(0);
   const [checking, setChecking] = useState(false);
   const [modelInput, setModelInput] = useState("");
@@ -138,7 +139,7 @@ export function AgentConnectionsDialog({ service, open, onClose }: AgentConnecti
                   modelError={modelError}
                   onAddModel={async () => {
                     try {
-                      await service.addCustomModel(selected.instanceId, modelInput);
+                      await vm.addCustomModel(selected.instanceId, modelInput);
                       setModelError("");
                       setModelInput("");
                     } catch (error) {
@@ -147,11 +148,11 @@ export function AgentConnectionsDialog({ service, open, onClose }: AgentConnecti
                     rerender();
                   }}
                   onToggleModel={async (modelId, enabled) => {
-                    await service.setModelEnabled(selected.instanceId, modelId, enabled);
+                    await vm.setModelEnabled(selected.instanceId, modelId, enabled);
                     rerender();
                   }}
                   onToggleFavorite={async (modelId, favorite) => {
-                    await service.setModelFavorite(selected.instanceId, modelId, favorite);
+                    await vm.setModelFavorite(selected.instanceId, modelId, favorite);
                     rerender();
                   }}
                 />
