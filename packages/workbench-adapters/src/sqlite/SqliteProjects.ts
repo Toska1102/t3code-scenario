@@ -113,6 +113,11 @@ const make = Effect.gen(function* () {
   );
 
   return ProjectRepository.ProjectRepository.of({
+    totals: sql<ProjectRepository.WorkbenchTotals>`
+      SELECT (SELECT COUNT(*) FROM workbench_teams) AS teams,
+             (SELECT COUNT(*) FROM workbench_projects) AS projects,
+             (SELECT COUNT(*) FROM workflow_store WHERE key GLOB 'workbench/task/*') AS tasks
+    `.pipe(readOnly, Effect.map((rows) => rows[0]!), Effect.mapError(toRepositoryError("totals"))),
     list: Effect.fn("SqliteProjects.list")(
       function* () {
         return yield* listRows(undefined).pipe(readOnly);

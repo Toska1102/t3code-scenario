@@ -1,6 +1,6 @@
 import { WorkbenchProjects } from "@t3tools/workbench-contracts";
 const { WorkbenchSummary } = WorkbenchProjects;
-import { Projects, Teams } from "@t3tools/workbench-core";
+import { Projects } from "@t3tools/workbench-core";
 import * as Effect from "effect/Effect";
 import * as HttpRouter from "effect/http/HttpRouter";
 import * as HttpServerRequest from "effect/http/HttpServerRequest";
@@ -122,11 +122,9 @@ const updateProject = Effect.gen(function* () {
 
 /** Home-page counters. Tasks arrive with the dispatch slice; until then none exist. */
 const summary = Effect.gen(function* () {
-  const teams = yield* Teams.Teams;
   const projects = yield* Projects.Projects;
-  const [teamList, projectList] = yield* Effect.all([teams.list(), projects.list()]);
-  return json(WorkbenchSummary, { teams: teamList.length, projects: projectList.length, tasks: 0 });
-}).pipe(Effect.catchTags({ TeamRepositoryError: internal, ProjectRepositoryError: internal }));
+  return json(WorkbenchSummary, yield* projects.totals);
+}).pipe(Effect.catchTags({ ProjectRepositoryError: internal }));
 
 export const routes = [
   HttpRouter.route("GET", "/projects", listProjects),

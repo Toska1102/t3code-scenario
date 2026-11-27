@@ -13,9 +13,16 @@ export class ProjectRepositoryError extends Schema.TaggedError<ProjectRepository
   }
 }
 
+export interface WorkbenchTotals {
+  readonly teams: number;
+  readonly projects: number;
+  readonly tasks: number;
+}
+
 export class ProjectRepository extends Context.Service<
   ProjectRepository,
   {
+    readonly totals: Effect.Effect<WorkbenchTotals, ProjectRepositoryError>;
     readonly list: () => Effect.Effect<ReadonlyArray<Project>, ProjectRepositoryError>;
     readonly listByTeam: (
       teamId: string | null,

@@ -61,6 +61,7 @@ export interface UpdateProjectInput {
 export class Projects extends Context.Service<
   Projects,
   {
+    readonly totals: Effect.Effect<ProjectRepository.WorkbenchTotals, ProjectRepository.ProjectRepositoryError>;
     readonly list: () => Effect.Effect<
       ReadonlyArray<Project>,
       ProjectRepository.ProjectRepositoryError
@@ -111,6 +112,7 @@ const make = Effect.gen(function* () {
   });
 
   return Projects.of({
+    totals: repository.totals,
     list: Effect.fn("Projects.list")(function* () {
       return yield* repository.list();
     }),

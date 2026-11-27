@@ -51,6 +51,9 @@ try {
       (item) => item.id === project.id && item.name === "招聘运营二期",
     ),
   );
+  const totals = await page.request.get(`${origin}/api/workbench/summary`);
+  NodeAssert.equal(totals.status(), 200);
+  NodeAssert.deepEqual(await totals.json(), { teams: 1, projects: 1, tasks: 0 });
   await page.reload();
   const refreshed = await page.request.get(`${origin}/api/auth/session`);
   NodeAssert.equal((await refreshed.json()).authenticated, true);
