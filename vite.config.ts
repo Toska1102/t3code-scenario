@@ -20,6 +20,7 @@ const TEST_CONFIG_PACKAGES = [
   "apps/mobile",
   "apps/server",
   "apps/web",
+  "apps/workbench-web",
   "packages/client-runtime",
 ];
 

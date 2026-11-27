@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "ES2024.Promise", "ESNext.Disposable", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src", "vite.config.ts"]
+}

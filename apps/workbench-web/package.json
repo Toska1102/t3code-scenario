@@ -1,0 +1,29 @@
+{
+  "name": "@t3tools/workbench-web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build",
+    "preview": "vp preview",
+    "typecheck": "effect-tsgo tsrs --noEmit",
+    "test": "vp test run"
+  },
+  "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/browser-playwright": "5.1.1",
+    "playwright": "1.64.1",
+    "tailwindcss": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}
